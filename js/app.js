@@ -329,7 +329,7 @@
 
     var d = compute();
     var failedMatching = d.rows.filter(function (j) { return j.status === 'failed'; });
-    var banner = (d.failed.length && (state.tab === 'all' || state.tab === 'failed')) ?
+    var banner = d.failed.length ?
       '<div class="banner" role="status">' + icon('alert-circle') +
         '<div class="text"><strong>' + d.failed.length + ' failed jobs across ' + Object.keys(d.failingDefs).length + ' agent definitions.</strong> Latest failure: ' + fmt(d.failed.map(function (j) { return j.c; }).sort().pop()) + '.</div>' +
         (state.grouped ? '<button class="link-btn" data-action="show-list">' + icon('menu-01') + 'Show as list</button>'
