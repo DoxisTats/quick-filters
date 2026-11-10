@@ -313,9 +313,11 @@
 
   function viewToast() {
     if (!state.toast) return '';
-    return '<div class="toast" role="status">' + icon('check-circle', 20, 'ok') +
-      '<div class="body"><strong>' + esc(state.toast.title) + '</strong><span>The jobs will start with the next agent cycle.</span>' +
-      '<div class="acts"><button class="link-btn gray" data-action="toast-dismiss">Dismiss</button><button class="link-btn" data-action="undo">Undo</button></div></div>' +
+    var info = !!state.toast.info;
+    return '<div class="toast" role="status">' + (info ? icon('alert-circle', 20, 'info') : icon('check-circle', 20, 'ok')) +
+      '<div class="body"><strong>' + esc(state.toast.title) + '</strong><span>' +
+        (info ? 'There is nothing to restart. Change the filters to include failed jobs.' : 'The jobs will start with the next agent cycle.') + '</span>' +
+      '<div class="acts"><button class="link-btn gray" data-action="toast-dismiss">Dismiss</button>' + (info ? '' : '<button class="link-btn" data-action="undo">Undo</button>') + '</div></div>' +
       '<button class="close" data-action="toast-dismiss" aria-label="Close">' + icon('x-close', 20) + '</button></div>';
   }
 
@@ -340,7 +342,7 @@
       '<div class="layout">' + viewSidebar() +
         '<main class="main">' +
           '<div class="page-header"><h1>Agent jobs</h1>' +
-            '<button class="btn btn-primary" data-action="restart-matching"' + (failedMatching.length ? '' : ' disabled') + '>' + icon('refresh-cw-05') +
+            '<button class="btn btn-primary" data-action="restart-matching">' + icon('refresh-cw-05') +
               '<span class="label-long">Restart all that match the filter criteria</span><span class="label-short">Restart ' + failedMatching.length + ' failed jobs</span></button></div>' +
           '<div class="content">' + banner +
             '<section class="card" aria-label="Agent jobs table">' + viewToolbar(d) + viewBulk() + viewTable(d) + viewFooter(d) + '</section>' +
@@ -404,7 +406,9 @@
         return queue(d.rows.filter(function (j) { return j.def === v && j.status === 'failed'; }).map(function (j) { return j.id; }));
       case 'restart-matching':
         d = compute();
-        return queue(d.rows.filter(function (j) { return j.status === 'failed'; }).map(function (j) { return j.id; }));
+        var ids = d.rows.filter(function (j) { return j.status === 'failed'; }).map(function (j) { return j.id; });
+        if (!ids.length) return set({ toast: { title: 'No failed jobs match the filter criteria', info: true } });
+        return queue(ids);
       case 'restart-selected':
         return queue(Object.keys(state.selected).map(Number).filter(function (id) { return (state.overrides[id] || window.SEED[id][0]) === 'failed'; }));
       case 'clear-selection': return set({ selected: {} });

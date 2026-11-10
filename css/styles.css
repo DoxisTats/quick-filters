@@ -245,6 +245,7 @@ a { color: var(--brand-dark); }
 /* ---------- Toast ---------- */
 .toast { position: fixed; right: 24px; bottom: 24px; z-index: 50; width: 400px; max-width: calc(100% - 32px); background: #FFFFFF; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-lg); padding: 16px; display: flex; gap: 16px; }
 .toast .icon.ok { color: #079455; }
+.toast .icon.info { color: var(--fg-quaternary); }
 .toast .body { flex: 1; display: flex; flex-direction: column; gap: 4px; }
 .toast .body span { color: var(--fg-secondary); }
 .toast .acts { display: flex; gap: 12px; margin-top: 8px; }
