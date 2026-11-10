@@ -157,7 +157,7 @@ a { color: var(--brand-dark); }
 /* ---------- Table ---------- */
 .table-wrap { overflow-x: auto; border-top: 1px solid var(--border-subtle); font-family: var(--font-table); }
 .table { min-width: 920px; }
-.tr { display: grid; grid-template-columns: 66px 120px minmax(220px, 1fr) 180px 132px 160px 144px 72px; align-items: center; min-height: 40px; }
+.tr { display: grid; grid-template-columns: 66px 120px minmax(220px, 1fr) 180px 132px 160px 144px; align-items: center; min-height: 40px; }
 .thead { border-bottom: 1px solid var(--border-subtle); color: var(--brand-dark); font-weight: 600; }
 .thead .th-sort { border: 0; background: transparent; padding: 0; color: inherit; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
 .td, .th { padding: 0 16px; min-width: 0; }
@@ -268,7 +268,7 @@ a { color: var(--brand-dark); }
 @media (max-width: 900px) {
   .table { min-width: 0; }
   .thead { display: none; }
-  .tr.data { grid-template-columns: 32px 1fr auto; grid-template-areas: "cb def act" "cb status status" "cb created created" "cb meta meta"; row-gap: 6px; padding: 12px 8px 12px 12px; align-items: start; }
+  .tr.data { grid-template-columns: 32px 1fr auto; grid-template-areas: "cb def def" "cb status status" "cb created created" "cb meta meta"; row-gap: 6px; padding: 12px 8px 12px 12px; align-items: start; }
   .tr.data .td { padding: 0; }
   .tr.data .cbcell { grid-area: cb; justify-content: flex-start; align-items: flex-start; padding-top: 2px; background: transparent !important; }
   .tr.data .c-status { grid-area: status; }

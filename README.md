@@ -39,8 +39,7 @@ Open `index.html` in a browser (double-click works), or serve the folder with `n
 - Text search on agent definition names
 - Sort menu (Creation date or grouped by Agent definition, descending or ascending, search restrictions)
 - Filters drawer (Status, Agent definition, Agent job type, Parent completed, Source, Creation date, ID & text search) with Apply, Cancel and Clear
-- Row selection, bulk restart, single-row restart, restart all matching failed jobs, Undo toast
-- Row details (start/end date, synchronous, group, sequence number, priority)
+- Row selection, bulk restart, restart all matching failed jobs, Undo toast
 - Grouped view by agent definition
 
 Fields without sample data (Trigger, Agent Runtime Service, Process class, dates, IDs) are layout only.
