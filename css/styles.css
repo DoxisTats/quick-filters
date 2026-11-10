@@ -109,7 +109,7 @@ a { color: var(--brand-dark); }
 .toolbar-right { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
 .icon-group { display: flex; gap: 8px; }
 
-.field-search { width: 220px; flex: 0 0 220px; height: 40px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #FFFFFF; border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-xs); color: var(--fg-quaternary); }
+.field-search { width: 220px; flex: 0 0 220px; min-width: 0; max-width: 100%; height: 40px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #FFFFFF; border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-xs); color: var(--fg-quaternary); }
 .field-search input { flex: 1; min-width: 0; border: 0; outline: none; padding: 0; font-size: 16px; line-height: 24px; color: var(--fg-primary); background: transparent; }
 .field-search input::placeholder { color: var(--fg-tertiary); }
 .field-search:focus-within { border-color: var(--brand); box-shadow: var(--focus); }
@@ -318,5 +318,16 @@ a { color: var(--brand-dark); }
   .toast { right: 12px; bottom: 12px; }
 }
 .label-short { display: none; }
+
+/* Very small phones (≤ 400px) */
+@media (max-width: 400px) {
+  .topbar { padding: 12px 8px; gap: 4px; }
+  .topbar .menu-btn { width: 36px; padding: 6px; }
+  .brand { width: auto; }
+  .topbar-actions { gap: 4px; }
+  .topbar-actions .icons { gap: 0; }
+  .topbar-actions .icon-btn { width: 36px; padding: 8px 6px; }
+  .topbar-actions .help-btn { display: none; }
+}
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

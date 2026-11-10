@@ -73,7 +73,7 @@
           '<div class="icons">' +
             '<button class="icon-btn search-toggle" data-action="search-toggle" aria-label="Search">' + icon('search-lg') + '</button>' +
             '<button class="icon-btn" aria-label="Notifications">' + icon('bell-01') + '</button>' +
-            '<button class="icon-btn" aria-label="Help">' + icon('help-circle') + '</button>' +
+            '<button class="icon-btn help-btn" aria-label="Help">' + icon('help-circle') + '</button>' +
           '</div>' +
           '<button class="avatar" aria-label="Account menu"><img src="assets/avatar.jpg" alt=""></button>' +
         '</div>' +
