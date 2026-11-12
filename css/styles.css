@@ -156,8 +156,12 @@ a { color: var(--brand-dark); }
 
 /* ---------- Table ---------- */
 .table-wrap { overflow-x: auto; border-top: 1px solid var(--border-subtle); font-family: var(--font-table); }
-.table { min-width: 920px; }
-.tr { display: grid; grid-template-columns: 66px 120px minmax(220px, 1fr) 180px 132px 160px 144px; align-items: center; min-height: 40px; }
+.table { width: max-content; min-width: 100%; }
+.tr { display: grid; grid-template-columns: var(--cols); align-items: center; min-height: 40px; }
+.td.center, .th.center { text-align: center; }
+.check-cell { display: inline-flex; vertical-align: middle; color: var(--brand); }
+.check-cell .icon { stroke-width: 2.5; }
+.thead .th { white-space: nowrap; }
 .thead { border-bottom: 1px solid var(--border-subtle); color: var(--brand-dark); font-weight: 600; }
 .thead .th-sort { border: 0; background: transparent; padding: 0; color: inherit; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
 .td, .th { padding: 0 16px; min-width: 0; }
@@ -165,8 +169,11 @@ a { color: var(--brand-dark); }
 .td.cbcell, .th.cbcell { display: flex; justify-content: center; align-self: stretch; align-items: center; padding: 0; }
 .td.ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .row { border-bottom: 1px solid var(--border-row); background: #FFFFFF; color: var(--fg-cell); line-height: 17px; }
-.row.selected { background: var(--bg-canvas); }
-.row.selected .cbcell { background: var(--bg-subtle); }
+.row.selected { background: var(--bg-subtle); }
+.tr.data { cursor: pointer; user-select: none; }
+.row:not(.selected):hover { background: var(--bg-canvas); }
+.bulk-spacer { flex: 1; }
+.bulk-hint { color: var(--fg-tertiary); line-height: 24px; }
 .row-actions { display: flex; justify-content: flex-end; gap: 2px; padding-right: 8px; }
 .row-actions button { width: 28px; height: 28px; padding: 4px; border: 0; border-radius: 6px; background: transparent; color: var(--fg-quaternary); display: flex; align-items: center; justify-content: center; }
 .row-actions button:hover { background: var(--bg-subtle); color: var(--fg-secondary); }
@@ -187,10 +194,10 @@ a { color: var(--brand-dark); }
 .group-head { min-height: 48px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 6px 16px 6px 21px; background: var(--bg-canvas); border-bottom: 1px solid var(--border-subtle); }
 .group-head .toggle { display: flex; align-items: center; gap: 8px; border: 0; background: transparent; padding: 4px 0; color: var(--fg-primary); font-weight: 600; text-align: left; min-width: 0; }
 .group-head .toggle .icon { color: var(--fg-tertiary); }
-.group-head .last { margin-left: auto; color: var(--fg-tertiary); }
+.group-head .last { color: var(--fg-tertiary); }
 .group-head .link-btn { font-family: var(--font); }
 
-.empty { padding: 48px 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; font-family: var(--font); }
+.empty { position: sticky; left: 0; width: 100vw; max-width: 1100px; padding: 48px 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; font-family: var(--font); }
 .empty strong { font-size: 16px; line-height: 24px; }
 .empty span { color: var(--fg-secondary); }
 .empty .btn { margin-top: 12px; }
@@ -242,8 +249,20 @@ a { color: var(--brand-dark); }
 .drawer-foot .spacer { flex: 1; }
 .drawer-foot .actions { display: flex; gap: 12px; }
 
+/* ---------- Job details side panel ---------- */
+.dp-head { min-height: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle); }
+.dp-head h2 { word-break: break-word; }
+.dp-head p { margin: 0; }
+.dp-body { gap: 0; padding-top: 8px; }
+.dp-body dl { margin: 0; }
+.dp-row { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border-row); }
+.dp-row dt { font-weight: 500; color: var(--fg-secondary); word-break: break-word; }
+.dp-row dd { margin: 0; color: var(--fg-primary); word-break: break-word; font-variant-numeric: tabular-nums; }
+.dp-row dd.dp-empty { color: var(--fg-quaternary); }
+@media (max-width: 720px) { .dp-row { grid-template-columns: 1fr; gap: 2px; } }
+
 /* ---------- Toast ---------- */
-.toast { position: fixed; right: 24px; bottom: 24px; z-index: 50; width: 400px; max-width: calc(100% - 32px); background: #FFFFFF; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-lg); padding: 16px; display: flex; gap: 16px; }
+.toast { position: fixed; right: 24px; top: calc(var(--topbar-h) + 24px); z-index: 60; width: 400px; max-width: calc(100% - 32px); background: #FFFFFF; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-lg); padding: 16px; display: flex; gap: 16px; }
 .toast .icon.ok { color: #079455; }
 .toast .icon.info { color: var(--fg-quaternary); }
 .toast .body { flex: 1; display: flex; flex-direction: column; gap: 4px; }
@@ -266,7 +285,9 @@ a { color: var(--brand-dark); }
 
 /* Tablets & phones: table rows become cards */
 @media (max-width: 900px) {
-  .table { min-width: 0; }
+  .table { width: auto; min-width: 0; }
+  .tr.data .c-extra { display: none; }
+  .empty { position: static; width: auto; }
   .thead { display: none; }
   .tr.data { grid-template-columns: 32px 1fr auto; grid-template-areas: "cb def def" "cb status status" "cb created created" "cb meta meta"; row-gap: 6px; padding: 12px 8px 12px 12px; align-items: start; }
   .tr.data .td { padding: 0; }
@@ -316,7 +337,7 @@ a { color: var(--brand-dark); }
   .drawer-foot .actions { flex: 1 1 100%; }
   .drawer-foot .actions .btn { flex: 1; }
   .two-col { grid-template-columns: 1fr; }
-  .toast { right: 12px; bottom: 12px; }
+  .toast { right: 12px; top: calc(var(--topbar-h) + 12px); }
 }
 .label-short { display: none; }
 
@@ -332,3 +353,23 @@ a { color: var(--brand-dark); }
 }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Details side panel uses the large drawer width (640px) */
+.drawer.details-panel { width: 640px; }
+.details-panel .dp-row { grid-template-columns: 240px minmax(0, 1fr); }
+@media (max-width: 720px) { .drawer.details-panel { width: 100%; } .details-panel .dp-row { grid-template-columns: 1fr; } }
+
+/* Table scrolls inside its card so the horizontal scrollbar is always on screen,
+   and the scrollbar is styled so it stays visible (no auto-hiding overlay scrollbars). */
+.table-wrap { overflow: auto; max-height: max(400px, calc(100vh - 360px)); }
+/* Chrome 121+ and Safari ignore ::-webkit-scrollbar styles (and fall back to auto-hiding
+   overlay scrollbars) when scrollbar-width/scrollbar-color are set, so only Firefox gets those. */
+@supports not selector(::-webkit-scrollbar) { .table-wrap { scrollbar-width: thin; scrollbar-color: #C4C7CC #FAFAFA; } }
+.table-wrap::-webkit-scrollbar-button { display: none; }
+.table-wrap::-webkit-scrollbar { width: 10px; height: 10px; }
+.table-wrap::-webkit-scrollbar-track { background: #FAFAFA; }
+.table-wrap::-webkit-scrollbar-thumb { background: #C4C7CC; border-radius: 9999px; border: 2px solid #FAFAFA; }
+.table-wrap::-webkit-scrollbar-thumb:hover { background: #A4A7AE; }
+.table-wrap::-webkit-scrollbar-corner { background: #FAFAFA; }
+.thead { position: sticky; top: 0; z-index: 2; background: #FFFFFF; }
+@media (max-width: 900px) { .table-wrap { max-height: none; overflow: visible; } }

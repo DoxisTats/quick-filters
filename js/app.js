@@ -16,7 +16,7 @@
     jobType: '', parent: '',
     selected: {}, open: {}, openGroups: {}, overrides: {},
     defOpen: false, defQ: '', sortOpen: false, filtersOpen: false, draft: null,
-    navOpen: false, searchOpen: false, toast: null
+    navOpen: false, searchOpen: false, toast: null, detailsId: null
   };
 
   /* ---------- helpers ---------- */
@@ -45,7 +45,7 @@
   function compute() {
     var jobs = window.SEED.map(function (r, i) {
       return { id: i, status: state.overrides[i] || r[0], def: r[1], c: r[2], st: r[3], en: r[4], ms: r[5], restarts: r[6], execs: r[7] };
-    });
+    }).filter(function (j) { return j.status !== 'deleted'; });
     var defKeys = Object.keys(state.defs);
     var q = state.q.trim().toLowerCase();
     var base = jobs.filter(function (j) {
@@ -168,40 +168,81 @@
     }).join('') + '<button class="link-btn" data-action="clear-all">Clear all</button></div>';
   }
 
-  function viewBulk() {
+  function viewBulk(total) {
     var n = Object.keys(state.selected).length;
-    if (!n) return '';
-    return '<div class="bulk"><span class="sel"><strong>' + n + '</strong> items selected</span>' +
+    // Always rendered (shows the total when nothing is selected) so selecting a row never shifts the table
+    if (!n) return '<div class="bulk"><span class="sel"><strong>' + total + '</strong> agent jobs</span></div>';
+    var one = n === 1 ? Object.keys(state.selected)[0] : null;
+    var open = one != null && !!state.open[one];
+    return '<div class="bulk"><span class="sel"><strong>' + n + '</strong> ' + (n === 1 ? 'item' : 'items') + ' selected</span>' +
+      '<span class="bulk-spacer"></span>' +
       '<button class="link-btn" data-action="restart-selected">' + icon('refresh-cw-05') + 'Restart</button>' +
-      '<button class="link-btn" data-action="clear-selection">' + icon('x-close') + 'Clear selection</button></div>';
+      '<button class="link-btn" data-action="delete-selected">' + icon('trash-01') + 'Delete</button>' +
+      (one != null ? '<button class="link-btn" data-action="toggle-details">' + icon('eye') + 'Display details</button>' : '') +
+      '</div>';
+  }
+
+  var COLS = window.JOB_COLUMNS;
+  var GRID = '66px ' + COLS.map(function (c) { return c[2] + 'px'; }).join(' ');
+  var CARD = { status: 'c-status', def: 'c-def', created: 'c-created', runtime: 'c-run', restarts: 'c-restarts', execs: 'c-exec' };
+  var MLABEL = { created: 'Created', runtime: 'Run time', restarts: 'Restarts', execs: 'Executions' };
+  function jobValues(j) {
+    var failed = j.status === 'failed';
+    return {
+      type: 'CRON-based', def: j.def + ' [dx4hr]', created: fmt(j.c), started: fmt(j.st), ended: fmt(j.en),
+      runtime: j.ms == null ? '–' : j.ms, restarts: j.restarts, execs: j.execs, sync: false, group: '', seq: '',
+      prio: 0, parent: true, client: '',
+      msg: failed ? 'javax.script.ScriptException: org.codehaus.groovy.control.MultipleCompilationErrorsException' : '',
+      trigger: j.def, ret: j.status === 'running' ? '' : (failed ? 1 : 0), restartable: failed,
+      service: 'Agent@localhost [dx4]', pclass: '', task: '', id: (window.JOB_IDS || [])[j.id] || ''
+    };
   }
 
   function viewRow(j) {
     var sel = !!state.selected[j.id];
     var op = !!state.open[j.id];
+    var v = jobValues(j);
+    var cells = COLS.map(function (c) {
+      var key = c[0], kind = c[4] || '', align = c[3] || 'left';
+      var cls = 'td ellipsis ' + (CARD[key] || 'c-extra') + (align === 'right' ? ' num' : align === 'center' ? ' center' : '');
+      var inner;
+      if (kind === 'badge') inner = '<span class="badge ' + j.status + '">' + META[j.status] + '</span>';
+      else if (kind === 'check') inner = v[key] === true ? '<span role="img" aria-label="Yes" class="check-cell">' + icon('check', 16) + '</span>' : '';
+      else inner = (MLABEL[key] ? '<span class="mlabel">' + MLABEL[key] + '</span>' : '') + esc(v[key]) + (key === 'runtime' && j.ms != null ? '<span class="mlabel" style="margin:0 0 0 2px">ms</span>' : '');
+      var title = kind ? '' : ' title="' + esc(v[key]) + '"';
+      return '<div class="' + cls + '"' + title + '>' + inner + '</div>';
+    }).join('');
     var html = '<div class="row' + (sel ? ' selected' : '') + '">' +
-      '<div class="tr data">' +
+      '<label class="tr data" title="Double-click to display details">' +
         '<div class="td cbcell"><input type="checkbox" class="cb" data-action="row-select" data-v="' + j.id + '"' + (sel ? ' checked' : '') + ' aria-label="Select ' + esc(j.def) + ' job created ' + fmt(j.c) + '"></div>' +
-        '<div class="td c-status"><span class="badge ' + j.status + '">' + META[j.status] + '</span></div>' +
-        '<div class="td ellipsis c-def">' + esc(j.def) + ' [dx4hr]</div>' +
-        '<div class="td c-created"><span class="mlabel">Created</span>' + fmt(j.c) + '</div>' +
-        '<div class="td num c-run"><span class="mlabel">Run time</span>' + (j.ms == null ? '–' : j.ms + '<span class="mlabel" style="margin:0 0 0 2px">ms</span>') + '</div>' +
-        '<div class="td num c-restarts"><span class="mlabel">Restarts</span>' + j.restarts + '</div>' +
-        '<div class="td num c-exec"><span class="mlabel">Executions</span>' + j.execs + '</div>' +
-      '</div>';
-    if (op) {
-      html += '<div class="details"><dl>' +
-        '<div><dt>Agent job type</dt><dd>CRON-based</dd></div>' +
-        '<div><dt>Start date</dt><dd>' + fmt(j.st) + '</dd></div>' +
-        '<div><dt>End date</dt><dd>' + fmt(j.en) + '</dd></div>' +
-        '<div><dt>Synchronous</dt><dd>No</dd></div>' +
-        '<div><dt>Group</dt><dd>–</dd></div>' +
-        '<div><dt>Sequence number</dt><dd>–</dd></div>' +
-        '<div><dt>Priority</dt><dd>–</dd></div>' +
-        '<div class="wide"><dt>Last error</dt><dd>' + (j.status === 'failed' ? '[Error message from job log]' : '–') + '</dd></div>' +
-        '</dl><a class="btn-ghost" href="#">View job log</a></div>';
-    }
+        cells +
+      '</label>';
     return html + '</div>';
+  }
+
+  function viewDetails(d) {
+    if (state.detailsId == null) return '';
+    var j = d.jobs.filter(function (x) { return x.id === state.detailsId; })[0];
+    if (!j) return '';
+    var v = jobValues(j);
+    var rows = COLS.map(function (c) {
+      var key = c[0], val = v[key];
+      if (key === 'status') val = META[j.status];
+      else if (c[4] === 'check') val = val ? 'Yes' : 'No';
+      var empty = val === '' || val == null || val === '–';
+      return '<div class="dp-row"><dt>' + esc(c[1]) + '</dt><dd' + (empty ? ' class="dp-empty"' : '') + '>' + (key === 'status' ? '<span class="badge ' + j.status + '">' + META[j.status] + '</span>' : (empty ? '–' : esc(val))) + '</dd></div>';
+    }).join('');
+    return '<button class="overlay" data-action="details-close" tabindex="-1" aria-label="Close job details"></button>' +
+      '<aside class="drawer details-panel" role="dialog" aria-modal="true" aria-labelledby="dp-title">' +
+        '<div class="drawer-head dp-head">' +
+          '<h2 id="dp-title">' + esc(j.def) + ' [dx4hr]</h2><p>Created ' + fmt(j.c) + '</p>' +
+          '<button class="close" data-action="details-close" aria-label="Close">' + icon('x-close', 20) + '</button></div>' +
+        '<div class="drawer-body dp-body"><dl>' + rows + '</dl></div>' +
+        '<div class="drawer-foot dp-foot"><span class="spacer"></span><div class="actions">' +
+          '<button class="btn btn-lg" data-action="details-close">Close</button>' +
+          (j.status === 'failed' ? '<button class="btn btn-primary btn-lg" data-action="details-restart">' + icon('refresh-cw-05') + 'Restart job</button>' : '') +
+        '</div></div>' +
+      '</aside>';
   }
 
   function viewTable(d) {
@@ -209,9 +250,12 @@
     var allSel = rows.length > 0 && rows.every(function (j) { return state.selected[j.id]; });
     var head = '<div class="tr thead" role="row">' +
       '<div class="th cbcell"><input type="checkbox" class="cb" data-action="select-all"' + (allSel ? ' checked' : '') + ' aria-label="Select all visible jobs"></div>' +
-      '<div class="th">Status</div><div class="th">Agent definition</div>' +
-      '<div class="th"><button class="th-sort" data-action="seq" data-v="' + (state.sortDesc ? 'asc' : 'desc') + '" aria-label="Sort by creation date, currently ' + (state.sortDesc ? 'newest first' : 'oldest first') + '">Creation date' + icon(state.sortDesc ? 'arrow-down' : 'arrow-up', 16) + '</button></div>' +
-      '<div class="th num">Run time [ms]</div><div class="th num">Automatic restarts</div><div class="th num">Execution count</div></div>';
+      COLS.map(function (c) {
+        var align = c[3] || 'left';
+        var cls = 'th' + (align === 'right' ? ' num' : align === 'center' ? ' center' : '');
+        if (c[4] === 'sort') return '<div class="' + cls + '"><button class="th-sort" data-action="seq" data-v="' + (state.sortDesc ? 'asc' : 'desc') + '" aria-label="Sort by creation date, currently ' + (state.sortDesc ? 'newest first' : 'oldest first') + '">' + esc(c[1]) + icon(state.sortDesc ? 'arrow-down' : 'arrow-up', 16) + '</button></div>';
+        return '<div class="' + cls + '">' + esc(c[1]) + '</div>';
+      }).join('') + '</div>';
 
     var body;
     if (!rows.length) {
@@ -235,7 +279,7 @@
     } else {
       body = rows.map(viewRow).join('');
     }
-    return '<div class="table-wrap"><div class="table">' + head + body + '</div></div>';
+    return '<div class="table-wrap"><div class="table" style="--cols:' + GRID + '">' + head + body + '</div></div>';
   }
 
   function viewFooter(d) {
@@ -310,7 +354,7 @@
   function viewToast() {
     if (!state.toast) return '';
     return '<div class="toast" role="status">' + icon('check-circle', 20, 'ok') +
-      '<div class="body"><strong>' + esc(state.toast.title) + '</strong><span>The jobs will start with the next agent cycle.</span>' +
+      '<div class="body"><strong>' + esc(state.toast.title) + '</strong><span>' + esc(state.toast.text || 'The jobs will start with the next agent cycle.') + '</span>' +
       '<div class="acts"><button class="link-btn gray" data-action="toast-dismiss">Dismiss</button><button class="link-btn" data-action="undo">Undo</button></div></div>' +
       '<button class="close" data-action="toast-dismiss" aria-label="Close">' + icon('x-close', 20) + '</button></div>';
   }
@@ -339,10 +383,10 @@
             '<button class="btn btn-primary" data-action="restart-matching"' + (failedMatching.length ? '' : ' disabled') + '>' + icon('refresh-cw-05') +
               '<span class="label-long">Restart all that match the filter criteria</span><span class="label-short">Restart ' + failedMatching.length + ' failed jobs</span></button></div>' +
           '<div class="content">' + banner +
-            '<section class="card" aria-label="Agent jobs table">' + viewToolbar(d) + viewBulk() + viewTable(d) + viewFooter(d) + '</section>' +
+            '<section class="card" aria-label="Agent jobs table">' + viewToolbar(d) + viewBulk(d.rows.length) + viewTable(d) + viewFooter(d) + '</section>' +
           '</div>' +
         '</main>' +
-      '</div>' + viewDrawer() + viewToast();
+      '</div>' + viewDrawer() + viewDetails(d) + viewToast();
 
     if (key) {
       var el = root.querySelector('[data-input="' + key + '"]');
@@ -351,6 +395,7 @@
   }
 
   /* ---------- events ---------- */
+  var lastRowClick = { id: null, t: 0 };
   root.addEventListener('click', function (e) {
     var t = e.target.closest('[data-action]');
     if (!t) return;
@@ -391,7 +436,16 @@
         var n = {};
         if (!allSel) d.rows.forEach(function (j) { n[j.id] = true; });
         return set({ selected: n });
-      case 'row-select': d = Object.assign({}, state.selected); if (d[v]) delete d[v]; else d[v] = true; return set({ selected: d });
+      case 'row-select':
+        // The table re-renders on every click, so a double-click is detected here (two clicks on the same row within 400ms)
+        var now = Date.now();
+        if (lastRowClick.id === v && now - lastRowClick.t < 400) {
+          lastRowClick = { id: null, t: 0 };
+          var only = {}; only[v] = true;
+          return set({ selected: only, detailsId: +v });
+        }
+        lastRowClick = { id: v, t: now };
+        d = Object.assign({}, state.selected); if (d[v]) delete d[v]; else d[v] = true; return set({ selected: d });
       case 'row-open': d = Object.assign({}, state.open); d[v] = !d[v]; return set({ open: d });
       case 'row-restart': return queue([+v]);
       case 'group-toggle': d = Object.assign({}, state.openGroups); d[v] = !d[v]; return set({ openGroups: d });
@@ -403,7 +457,16 @@
         return queue(d.rows.filter(function (j) { return j.status === 'failed'; }).map(function (j) { return j.id; }));
       case 'restart-selected':
         return queue(Object.keys(state.selected).map(Number).filter(function (id) { return (state.overrides[id] || window.SEED[id][0]) === 'failed'; }));
-      case 'clear-selection': return set({ selected: {} });
+      case 'clear-selection': return set({ selected: {}, open: {} });
+      case 'delete-selected':
+        var prevO = state.overrides, nextO = Object.assign({}, prevO), delIds = Object.keys(state.selected);
+        delIds.forEach(function (id) { nextO[id] = 'deleted'; });
+        return set({ overrides: nextO, selected: {}, open: {}, toast: { title: delIds.length + (delIds.length === 1 ? ' job deleted' : ' jobs deleted'), text: 'You can undo this for a few seconds.', prev: prevO } });
+      case 'toggle-details':
+        var sid = Object.keys(state.selected)[0];
+        return sid != null ? set({ detailsId: +sid }) : undefined;
+      case 'details-close': return set({ detailsId: null });
+      case 'details-restart': return queue([state.detailsId]);
       case 'group-failing':
         d = compute();
         var o = {};
@@ -415,6 +478,18 @@
     }
   });
 
+  // Double-click a row to open its details side panel
+  root.addEventListener('dblclick', function (e) {
+    var row = e.target.closest('.tr.data');
+    if (!row) return;
+    var cb = row.querySelector('[data-action="row-select"]');
+    if (!cb) return;
+    var id = +cb.getAttribute('data-v');
+    var sel = {}; sel[id] = true;
+    if (window.getSelection) window.getSelection().removeAllRanges();
+    set({ selected: sel, detailsId: id });
+  });
+
   root.addEventListener('input', function (e) {
     var key = e.target.getAttribute('data-input');
     if (!key) return;
@@ -424,6 +499,7 @@
 
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
+      if (state.detailsId != null) return set({ detailsId: null });
       if (state.filtersOpen) return set({ filtersOpen: false });
       if (state.defOpen || state.sortOpen) return set({ defOpen: false, sortOpen: false });
       if (state.navOpen) return set({ navOpen: false });
