@@ -60,3 +60,6 @@ window.NAV = [
   { title: 'Compliance', items: [['Retention rules', 'shield-01', '']] },
   { title: 'Administration', items: [['Jobs', 'clock-fast-forward', 'chevron-up'], ['>Agents'], ['>File import (FIPS)'], ['>Fulltext'], ['>Replication'], ['>Deletion']] }
 ];
+
+/* Side menu links between the prototype pages; window.PAGE (set in each HTML file) marks the current one. */
+window.NAV_LINKS = { 'Agents': 'index.html', 'Groups': 'groups.html' };

@@ -16,7 +16,7 @@
     jobType: '', parent: '',
     selected: {}, open: {}, openGroups: {}, overrides: {},
     defOpen: false, defQ: '', sortOpen: false, filtersOpen: false, draft: null,
-    navOpen: false, searchOpen: false, toast: null, detailsId: null
+    jobsOpen: true, navOpen: false, searchOpen: false, toast: null, detailsId: null
   };
 
   /* ---------- helpers ---------- */
@@ -66,7 +66,7 @@
     return '' +
       '<header class="topbar">' +
         '<button class="menu-btn" data-action="nav-toggle" aria-label="Open menu" aria-expanded="' + state.navOpen + '">' + icon('menu-01') + '</button>' +
-        '<a class="brand" href="#" aria-label="Doxis Business Studio home"><img src="assets/doxis-logo.svg" alt="Doxis"><span>Business Studio</span></a>' +
+        '<a class="brand" href="index.html" aria-label="Doxis Business Studio home"><img src="assets/doxis-logo.svg" alt="Doxis"><span>Business Studio</span></a>' +
         '<label class="topbar-search' + (state.searchOpen ? ' open' : '') + '">' + icon('search-lg') +
           '<input type="search" placeholder="Search" aria-label="Search Business Studio"></label>' +
         '<div class="topbar-actions">' +
@@ -82,11 +82,17 @@
 
   function viewSidebar() {
     var groups = window.NAV.map(function (g) {
-      var items = g.items.map(function (it) {
+      var items = g.items.filter(function (it) { return it[0].charAt(0) !== '>' || state.jobsOpen; }).map(function (it) {
         var sub = it[0].charAt(0) === '>';
         var label = sub ? it[0].slice(1) : it[0];
-        var cur = label === 'Agents';
-        return '<div class="nav-item' + (sub ? ' sub' : '') + '"><a href="#"' + (cur ? ' aria-current="page"' : '') + '>' +
+        if (label === 'Jobs') {
+          // Expandable section: toggles its sub pages
+          return '<div class="nav-item"><a href="#" data-action="jobs-toggle" aria-expanded="' + state.jobsOpen + '">' + icon(it[1], 20, 'lead') +
+            '<span class="label">Jobs</span>' + icon(state.jobsOpen ? 'chevron-up' : 'chevron-down', 16, 'trail') + '</a></div>';
+        }
+        var cur = label === (window.PAGE || 'Agents');
+        var href = (window.NAV_LINKS && window.NAV_LINKS[label]) || '#';
+        return '<div class="nav-item' + (sub ? ' sub' : '') + '"><a href="' + href + '"' + (cur ? ' aria-current="page"' : '') + '>' +
           (sub ? '' : icon(it[1], 20, 'lead')) + '<span class="label">' + esc(label) + '</span>' +
           (it[2] ? icon(it[2], 16, 'trail') : '') + '</a></div>';
       }).join('');
@@ -404,6 +410,7 @@
     var f = t.getAttribute('data-field');
     var d;
     switch (act) {
+      case 'jobs-toggle': e.preventDefault(); return set({ jobsOpen: !state.jobsOpen });
       case 'nav-toggle': return set({ navOpen: !state.navOpen });
       case 'search-toggle': return set({ searchOpen: !state.searchOpen });
       case 'tab': return set({ tab: v, selected: {} });

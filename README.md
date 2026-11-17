@@ -1,6 +1,10 @@
-# Agent jobs – Doxis Business Studio prototype
+# Agent jobs & Groups – Doxis Business Studio prototype
 
-Clickable, responsive prototype of the redesigned **Agent jobs** page (Administration › Jobs › Agents).
+Clickable, responsive prototype of two redesigned Business Studio pages, linked through the side menu:
+
+- **Agent jobs** (Administration › Jobs › Agents) – `index.html`
+- **Groups** (Security › Groups) – `groups.html`
+
 Plain HTML, CSS and JavaScript: no build step and no dependencies apart from Google Fonts.
 
 ![Desktop](docs/desktop.png)
@@ -8,6 +12,10 @@ Plain HTML, CSS and JavaScript: no build step and no dependencies apart from Goo
 | Details panel | Filters drawer |
 | --- | --- |
 | ![Details](docs/desktop-details.png) | ![Filters](docs/desktop-filters.png) |
+
+| Groups |
+| --- |
+| ![Groups](docs/groups.png) |
 
 | Tablet | Phone |
 | --- | --- |
@@ -35,13 +43,15 @@ Alternative without Actions: set **Source** to **Deploy from a branch**, choose 
 ### Updating an existing repository
 
 Replace all files in the repository with the contents of this folder and push (or upload) again; the workflow redeploys automatically.
-`index.html` loads the CSS and JS with a version suffix (`?v=20261112`). Change it when you edit those files so browsers don't keep an old cached copy.
+`index.html` loads the CSS and JS with a version suffix (`?v=20261117`). Change it when you edit those files so browsers don't keep an old cached copy.
 
 ## Run it locally
 
 Open `index.html` in a browser (double-click works), or serve the folder with `npx serve .` or `python3 -m http.server`.
 
 ## What works
+
+### Agent jobs
 
 - **Status tabs** (All, Current, Unsuccessful, Successful) with live counts
 - **Failed jobs banner** on every tab while failed jobs exist, switching between the list and the view grouped by agent definition
@@ -52,6 +62,14 @@ Open `index.html` in a browser (double-click works), or serve the folder with `n
 - **Row selection**: click a row (or its checkbox) to select it; the bar above the table shows the total number of jobs, or the selection with **Restart**, **Delete** and **Display details** (single selection)
 - **Details side panel** (640px) with every field of the job and its status badge; opens with Display details or by double-clicking a row; Escape closes it
 - **Notifications** in the top right corner, with Undo for restart and delete
+
+### Groups
+
+- **Group list** with search and member counts; select a group to see its members
+- **Group details**: name, the application that references it, Edit (rename) and Delete with a confirmation dialog, member search, and a table of users, roles and units with Remove
+- **Add to group** side panel (Figma: sidepanel.fig) with Users, Roles and Units tabs, search, an A–Z index on the right; each entry shows the name with "username · email" below; add with the ⊕ button or by **dragging** an entry into the members table
+- **Create group** dialog with name validation (empty or duplicate names)
+- Notifications in the top right corner with Undo for add, remove, rename and delete; they close on their own after 8 seconds
 
 Fields without sample data (Group, Sequence number, Trigger, Agent Runtime Service, Process class, Task and similar) show "–".
 
@@ -67,11 +85,14 @@ Fields without sample data (Group, Sequence number, Trigger, Agent Runtime Servi
 ## Files
 
 ```
-index.html                    page shell
+index.html                    Agent jobs page
+groups.html                   Groups page
 css/styles.css                design tokens, components, breakpoints
 js/icons.js                   Untitled UI icon paths (from the Doxis Figma library)
 js/data.js                    sample jobs, job IDs, table columns and side menu – replace with API data
-js/app.js                     state, rendering and interactions
+js/app.js                     Agent jobs: state, rendering and interactions
+js/groups-data.js             sample groups, users, roles and units – replace with API data
+js/groups.js                  Groups: state, rendering, drag and drop
 assets/                       Doxis logo and avatar
 docs/                         screenshots used in this README
 .github/workflows/pages.yml   GitHub Pages deployment
@@ -81,5 +102,5 @@ docs/                         screenshots used in this README
 ## Notes
 
 - Colors, type and spacing follow the Doxis One.Cloud design system and the Business Studio Figma files.
-- Sample data uses the HR agent definitions from the current Business Studio screen; it contains no customer data.
+- Sample data uses the HR agent definitions and group names from the current Business Studio screens. Person names on the Groups page are fictional (`@example.com`); no customer or employee data is included.
 - Firefox on macOS may still hide the table scrollbars while you're not scrolling, because it doesn't support custom scrollbar styling. Chrome, Edge and Safari keep them visible.
