@@ -26,6 +26,10 @@
     size = size || 20;
     return '<svg class="icon ' + (cls || '') + '" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" aria-hidden="true"><path d="' + (window.ICONS[name] || '') + '"/></svg>';
   }
+  /* Clear button for search fields: shown when the field has text */
+  function clearBtn(key) {
+    return state[key] ? '<button type="button" class="clear-x" data-action="clear-input" data-v="' + key + '" aria-label="Clear search" title="Clear">' + icon('x-close', 14) + '</button>' : '';
+  }
   function wbr(s) { return esc(s).replace(/_/g, '_<wbr>'); }
   var toastTimer = null;
   function set(patch) {
@@ -94,7 +98,7 @@
     }).join('');
     return '<section class="card g-list" aria-label="Groups">' +
       '<div class="g-head"><h2>Groups</h2><span class="count">' + state.groups.length + '</span></div>' +
-      '<div class="g-pad"><label class="input-icon">' + icon('search-lg') + '<input type="text" data-input="gq" value="' + esc(state.gq) + '" placeholder="Search groups" aria-label="Search groups"></label></div>' +
+      '<div class="g-pad"><label class="input-icon">' + icon('search-lg') + '<input type="text" data-input="gq" value="' + esc(state.gq) + '" placeholder="Search groups" aria-label="Search groups">' + clearBtn('gq') + '</label></div>' +
       '<div class="scroll-y g-items" data-scroll="list">' + (items || '<div class="g-none">No groups match “' + esc(state.gq) + '”.</div>') + '</div>' +
     '</section>';
   }
@@ -133,7 +137,7 @@
         '<button type="button" class="btn btn-icon" data-action="edit-open" aria-label="Edit group" title="Edit group">' + icon('edit-02') + '</button>' +
         '<button type="button" class="btn btn-icon danger" data-action="delete-open" aria-label="Delete group" title="Delete group">' + icon('trash-01') + '</button>' +
       '</div></div>' +
-      '<div class="gd-bar"><label class="field-search">' + icon('search-lg') + '<input type="text" data-input="mq" value="' + esc(state.mq) + '" placeholder="Search for user, role or unit" aria-label="Search members"></label>' +
+      '<div class="gd-bar"><label class="field-search">' + icon('search-lg') + '<input type="text" data-input="mq" value="' + esc(state.mq) + '" placeholder="Search for user, role or unit" aria-label="Search members">' + clearBtn('mq') + '</label>' +
         '<span class="total"><strong>' + g.members.length + '</strong> ' + (g.members.length === 1 ? 'member' : 'members') + '</span></div>' +
       '<div class="scroll-y g-table" data-scroll="members">' + body + '</div>' +
       '<div class="drop-hint" aria-hidden="true">' + icon('user-plus-01') + 'Drop to add to ' + esc(g.name) + '</div>' +
@@ -200,11 +204,12 @@
     } else {
       body = (LARGE ? '<div class="ga-count" role="status">' + entries.length + (entries.length === 1 ? ' result' : ' results') + ' for “' + esc(state.pqRun) + '”</div>' : '') + list;
     }
-    var searchField = '<label class="input-icon">' + icon('search-lg') + '<input type="' + (LARGE ? 'search' : 'text') + '" data-input="pq" value="' + esc(state.pq) + '" placeholder="Search" aria-label="Search for ' + single + '"' + (LARGE ? ' enterkeyhint="search"' : '') + '></label>';
+    var searchField = '<label class="input-icon">' + icon('search-lg') + '<input type="' + (LARGE ? 'search' : 'text') + '" data-input="pq" value="' + esc(state.pq) + '" placeholder="Search" aria-label="Search for ' + single + '"' + (LARGE ? ' enterkeyhint="search"' : '') + '>' + clearBtn('pq') + '</label>';
     var search = LARGE
       ? '<form class="ga-search" data-form="pool" role="search"><div class="input-icon ga-field">' +
-          '<input type="search" data-input="pq" value="' + esc(state.pq) + '" placeholder="Search" aria-label="Search for ' + single + '" enterkeyhint="search">' +
-          '<button type="submit" class="ga-go" aria-label="Search" title="Search">' + icon('search-lg') + '</button></div></form>'
+          // Same look as the Figma search field; the leading search icon is also the submit button
+          '<button type="submit" class="ga-go" aria-label="Search" title="Search">' + icon('search-lg') + '</button>' +
+          '<input type="search" data-input="pq" value="' + esc(state.pq) + '" placeholder="Search" aria-label="Search for ' + single + '" enterkeyhint="search">' + clearBtn('pq') + '</div></form>'
       : searchField;
     var az = letters.length > 1 ? '<nav class="az-index" aria-label="Jump to letter">' + letters.map(function (l) {
       var on = (letters.indexOf(state.letter) >= 0 ? state.letter : letters[0]) === l;
@@ -349,6 +354,13 @@
         return set({ toast: { title: who(v, type).primary + ' removed from ' + g.name, text: 'The ' + TYPE_LABEL[type].toLowerCase() + ' no longer has the group’s access.', prev: prev } });
       }
       case 'clear-mq': return set({ mq: '' });
+      case 'clear-input': {
+        var cp = {}; cp[v] = '';
+        if (v === 'pq') { cp.pqRun = null; cp.letter = null; }
+        set(cp);
+        var inp = root.querySelector('[data-input="' + v + '"]'); if (inp) inp.focus();
+        return;
+      }
       case 'create-open': return openModal({ kind: 'create', value: '' });
       case 'edit-open': return openModal({ kind: 'edit', value: g.name });
       case 'delete-open': return openModal({ kind: 'delete' });
