@@ -9,10 +9,8 @@
   var TAB_LABEL = { users: 'Users', roles: 'Roles', units: 'Units' };
 
   /* Organization size: 'small' lists everyone and filters while typing;
-     'large' starts empty and searches as you type from 2 characters (or on Enter) (set window.ORG_SIZE in the HTML file). */
+     'large' starts empty and only searches when the search is submitted (search icon or Enter), to avoid a backend request per keystroke (set window.ORG_SIZE in the HTML file). */
   var LARGE = window.ORG_SIZE === 'large';
-  var MIN_CHARS = 2;
-  var searchTimer = null;
   var nextId = 0;
   var state = {
     groups: D.groups.map(function (g) {
@@ -109,7 +107,7 @@
     }
     var q = state.mq.trim().toLowerCase();
     var members = g.members.slice().sort(function (a, b) { return cmp(who(a.name, a.type).primary, who(b.name, b.type).primary); })
-      .filter(function (m) { return !q || m.name.toLowerCase().indexOf(q) >= 0 || who(m.name, m.type).primary.toLowerCase().indexOf(q) >= 0 || who(m.name, m.type).secondary.toLowerCase().indexOf(q) >= 0 || TYPE_LABEL[m.type].toLowerCase().indexOf(q) >= 0; });
+      .filter(function (m) { var w = who(m.name, m.type); return matchesAll(q, [m.name, w.primary, w.secondary, TYPE_LABEL[m.type]]); });
     var rows = members.map(function (m) {
       return '<div class="g-tr g-row">' +
         '<div class="g-name"><span class="type-ic ' + m.type + '">' + icon(TYPE_ICON[m.type], 16) + '</span>' + (function () { var w = who(m.name, m.type); return '<span class="nm2"><span title="' + esc(w.hint) + '">' + esc(w.primary) + '</span>' + (w.secondary ? '<small title="' + esc(w.secondary) + '">' + esc(w.secondary) + '</small>' : '') + '</span>'; })() + '</div>' +
@@ -143,6 +141,15 @@
   }
 
   /* Display name + secondary line for a pool entry (Figma: sidepanel.fig "Add to rights") */
+  /* Word-order independent search: every word of the query must appear somewhere
+     in the entry (name, username, email or type), so "becker anna" finds Anna Becker. */
+  function matchesAll(query, fields) {
+    var words = String(query || '').toLowerCase().split(/[\s,;]+/).filter(Boolean);
+    if (!words.length) return true;
+    var hay = fields.join(' ').toLowerCase();
+    return words.every(function (w) { return hay.indexOf(w) >= 0; });
+  }
+
   function who(name, type) {
     // People: name on top, "username · email" below. Technical accounts: the name is the username.
     if (type !== 'user') return { primary: name, secondary: '', hint: name };
@@ -160,7 +167,7 @@
     var q = (LARGE ? (state.pqRun || '') : state.pq).trim().toLowerCase();
     var waiting = LARGE && !q; // large organizations: nothing is listed until a search runs
     var entries = waiting ? [] : D[state.tab].map(function (n) { var w = who(n, type); return { name: n, primary: w.primary, secondary: w.secondary, hint: w.hint }; })
-      .filter(function (e) { return !q || e.primary.toLowerCase().indexOf(q) >= 0 || e.secondary.toLowerCase().indexOf(q) >= 0 || e.name.toLowerCase().indexOf(q) >= 0; })
+      .filter(function (e) { return matchesAll(q, [e.name, e.primary, e.secondary]); })
       .sort(function (a, b) { return cmp(a.primary, b.primary); });
     var byLetter = {};
     entries.forEach(function (e) { var l = e.primary.charAt(0).toUpperCase(); (byLetter[l] = byLetter[l] || []).push(e); });
@@ -186,7 +193,7 @@
     var body;
     if (waiting) {
       body = '<div class="ga-empty"><div class="featured">' + icon('search-lg', 24) + '</div><strong>Search for ' + plural + '</strong>' +
-        '<span>Type at least ' + MIN_CHARS + ' characters of a name' + (state.tab === 'users' ? ', username or email' : '') + '. Results appear as you type.</span></div>';
+        '<span>Enter a name' + (state.tab === 'users' ? ', username or email' : '') + ', then press Enter or select the search icon.</span></div>';
     } else if (!list) {
       body = '<div class="ga-empty"><div class="featured">' + icon('search-lg', 24) + '</div><strong>No ' + plural + ' found</strong>' +
         '<span>No ' + single + ' matches “' + esc(LARGE ? state.pqRun : state.pq) + '”. Check the spelling or try another search.</span></div>';
@@ -195,7 +202,9 @@
     }
     var searchField = '<label class="input-icon">' + icon('search-lg') + '<input type="' + (LARGE ? 'search' : 'text') + '" data-input="pq" value="' + esc(state.pq) + '" placeholder="Search" aria-label="Search for ' + single + '"' + (LARGE ? ' enterkeyhint="search"' : '') + '></label>';
     var search = LARGE
-      ? '<form class="ga-search" data-form="pool" role="search">' + searchField + '</form>'
+      ? '<form class="ga-search" data-form="pool" role="search"><div class="input-icon ga-field">' +
+          '<input type="search" data-input="pq" value="' + esc(state.pq) + '" placeholder="Search" aria-label="Search for ' + single + '" enterkeyhint="search">' +
+          '<button type="submit" class="ga-go" aria-label="Search" title="Search">' + icon('search-lg') + '</button></div></form>'
       : searchField;
     var az = letters.length > 1 ? '<nav class="az-index" aria-label="Jump to letter">' + letters.map(function (l) {
       var on = (letters.indexOf(state.letter) >= 0 ? state.letter : letters[0]) === l;
@@ -383,7 +392,6 @@
     if (e.target.getAttribute('data-form') !== 'pool') return;
     e.preventDefault();
     var q = state.pq.trim();
-    clearTimeout(searchTimer);
     set({ pqRun: q || null, letter: null });
     var pl = root.querySelector('[data-scroll="pool"]'); if (pl) pl.scrollTop = 0;
   });
@@ -393,13 +401,8 @@
     if (!key) return;
     if (key === 'modalValue') { state.modal.value = e.target.value; if (state.modal.error) { state.modal.error = null; render(); } return; }
     var p = {}; p[key] = e.target.value;
-    if (LARGE && key === 'pq') {
-      // Large organizations: search as you type once MIN_CHARS are entered (debounced, like a server request); Enter searches right away
-      var v = e.target.value.trim();
-      clearTimeout(searchTimer);
-      if (v.length < MIN_CHARS) p.pqRun = null;
-      else searchTimer = setTimeout(function () { set({ pqRun: v, letter: null }); }, 300);
-    }
+    // Large organizations: no search while typing (each search is a backend request); clearing the field resets the list
+    if (LARGE && key === 'pq' && !e.target.value.trim()) p.pqRun = null;
     set(p);
   });
 

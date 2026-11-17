@@ -5,7 +5,7 @@ Clickable, responsive prototype of two redesigned Business Studio pages, linked 
 - **Agent jobs** (Administration › Jobs › Agents) – `index.html`
 - **Groups** (Security › Groups), in two versions:
   - small organization – `groups.html`: the "Add to group" panel lists everyone and filters while you type
-  - large organization – `groups-large.html`: the panel stays empty until you search; results appear as you type once 2 characters are entered (Enter searches right away)
+  - large organization – `groups-large.html`: the panel stays empty until you search; the search runs only when submitted (Enter or the search icon), so typing doesn't send a request per keystroke
 
 Plain HTML, CSS and JavaScript: no build step and no dependencies apart from Google Fonts.
 
@@ -45,7 +45,7 @@ Alternative without Actions: set **Source** to **Deploy from a branch**, choose 
 ### Updating an existing repository
 
 Replace all files in the repository with the contents of this folder and push (or upload) again; the workflow redeploys automatically.
-`index.html` loads the CSS and JS with a version suffix (`?v=20261118e`). Change it when you edit those files so browsers don't keep an old cached copy.
+`index.html` loads the CSS and JS with a version suffix (`?v=20261118h`). Change it when you edit those files so browsers don't keep an old cached copy.
 
 ## Run it locally
 
