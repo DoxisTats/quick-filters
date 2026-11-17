@@ -8,13 +8,18 @@
   var POOL = { users: 'user', roles: 'role', units: 'unit' };
   var TAB_LABEL = { users: 'Users', roles: 'Roles', units: 'Units' };
 
+  /* Organization size: 'small' lists everyone and filters while typing;
+     'large' starts empty and searches as you type from 2 characters (or on Enter) (set window.ORG_SIZE in the HTML file). */
+  var LARGE = window.ORG_SIZE === 'large';
+  var MIN_CHARS = 2;
+  var searchTimer = null;
   var nextId = 0;
   var state = {
     groups: D.groups.map(function (g) {
       return { id: nextId++, name: g[0], ref: g[1], members: g[2].map(function (m) { return { name: m[0], type: m[1] }; }) };
     }),
     selId: 0, gq: '', mq: '', tab: 'users', pq: '',
-    modal: null, toast: null, letter: null, jobsOpen: false, navOpen: false, searchOpen: false
+    modal: null, toast: null, pqRun: null, letter: null, jobsOpen: false, navOpen: false, searchOpen: false
   };
 
   /* ---------- helpers ---------- */
@@ -152,8 +157,9 @@
   function viewAdd() {
     var g = sel();
     var type = POOL[state.tab];
-    var q = state.pq.trim().toLowerCase();
-    var entries = D[state.tab].map(function (n) { var w = who(n, type); return { name: n, primary: w.primary, secondary: w.secondary, hint: w.hint }; })
+    var q = (LARGE ? (state.pqRun || '') : state.pq).trim().toLowerCase();
+    var waiting = LARGE && !q; // large organizations: nothing is listed until a search runs
+    var entries = waiting ? [] : D[state.tab].map(function (n) { var w = who(n, type); return { name: n, primary: w.primary, secondary: w.secondary, hint: w.hint }; })
       .filter(function (e) { return !q || e.primary.toLowerCase().indexOf(q) >= 0 || e.secondary.toLowerCase().indexOf(q) >= 0 || e.name.toLowerCase().indexOf(q) >= 0; })
       .sort(function (a, b) { return cmp(a.primary, b.primary); });
     var byLetter = {};
@@ -176,6 +182,21 @@
       }).join('') + '</div>';
     }).join('');
     var single = { users: 'user', roles: 'role', units: 'unit' }[state.tab];
+    var plural = { users: 'users', roles: 'roles', units: 'units' }[state.tab];
+    var body;
+    if (waiting) {
+      body = '<div class="ga-empty"><div class="featured">' + icon('search-lg', 24) + '</div><strong>Search for ' + plural + '</strong>' +
+        '<span>Type at least ' + MIN_CHARS + ' characters of a name' + (state.tab === 'users' ? ', username or email' : '') + '. Results appear as you type.</span></div>';
+    } else if (!list) {
+      body = '<div class="ga-empty"><div class="featured">' + icon('search-lg', 24) + '</div><strong>No ' + plural + ' found</strong>' +
+        '<span>No ' + single + ' matches “' + esc(LARGE ? state.pqRun : state.pq) + '”. Check the spelling or try another search.</span></div>';
+    } else {
+      body = (LARGE ? '<div class="ga-count" role="status">' + entries.length + (entries.length === 1 ? ' result' : ' results') + ' for “' + esc(state.pqRun) + '”</div>' : '') + list;
+    }
+    var searchField = '<label class="input-icon">' + icon('search-lg') + '<input type="' + (LARGE ? 'search' : 'text') + '" data-input="pq" value="' + esc(state.pq) + '" placeholder="Search" aria-label="Search for ' + single + '"' + (LARGE ? ' enterkeyhint="search"' : '') + '></label>';
+    var search = LARGE
+      ? '<form class="ga-search" data-form="pool" role="search">' + searchField + '</form>'
+      : searchField;
     var az = letters.length > 1 ? '<nav class="az-index" aria-label="Jump to letter">' + letters.map(function (l) {
       var on = (letters.indexOf(state.letter) >= 0 ? state.letter : letters[0]) === l;
       return '<button type="button" class="az" data-action="jump" data-v="' + l + '" aria-label="Jump to ' + l + '"' + (on ? ' aria-current="true"' : '') + '>' + l + '</button>';
@@ -183,9 +204,9 @@
     return '<section class="card g-add" aria-label="Add to group">' +
       '<div class="ga-head"><h2>Add to group</h2><p>Drag an entry into the table or select Add.</p></div>' +
       '<div class="tabs tabs-sm" role="tablist" aria-label="Member type">' + tabs + '</div>' +
-      '<label class="input-icon">' + icon('search-lg') + '<input type="text" data-input="pq" value="' + esc(state.pq) + '" placeholder="Search" aria-label="Search for ' + single + '"></label>' +
+      search +
       '<div class="ga-list">' +
-        '<div class="scroll-y pool" data-scroll="pool">' + (list || '<div class="g-none">No ' + single + ' matches “' + esc(state.pq) + '”.</div>') + '</div>' +
+        '<div class="scroll-y pool" data-scroll="pool">' + body + '</div>' +
         az +
       '</div>' +
     '</section>';
@@ -304,7 +325,7 @@
       case 'nav-toggle': return set({ navOpen: !state.navOpen });
       case 'search-toggle': return set({ searchOpen: !state.searchOpen });
       case 'select-group': return set({ selId: +v, mq: '', navOpen: false });
-      case 'tab': { set({ tab: v, pq: '', letter: null }); var pl = root.querySelector('[data-scroll="pool"]'); if (pl) pl.scrollTop = 0; return; }
+      case 'tab': { set({ tab: v, pq: '', pqRun: null, letter: null }); var pl = root.querySelector('[data-scroll="pool"]'); if (pl) pl.scrollTop = 0; return; }
       case 'jump': {
         var list = root.querySelector('[data-scroll="pool"]');
         var sec = list && list.querySelector('[data-letter="' + v + '"]');
@@ -357,11 +378,29 @@
     else { var b = root.querySelector('.modal [data-action="modal-close"].btn'); if (b) b.focus(); }
   }
 
+  // Large organizations: run the search on Enter, not while typing
+  root.addEventListener('submit', function (e) {
+    if (e.target.getAttribute('data-form') !== 'pool') return;
+    e.preventDefault();
+    var q = state.pq.trim();
+    clearTimeout(searchTimer);
+    set({ pqRun: q || null, letter: null });
+    var pl = root.querySelector('[data-scroll="pool"]'); if (pl) pl.scrollTop = 0;
+  });
+
   root.addEventListener('input', function (e) {
     var key = e.target.getAttribute('data-input');
     if (!key) return;
     if (key === 'modalValue') { state.modal.value = e.target.value; if (state.modal.error) { state.modal.error = null; render(); } return; }
-    var p = {}; p[key] = e.target.value; set(p);
+    var p = {}; p[key] = e.target.value;
+    if (LARGE && key === 'pq') {
+      // Large organizations: search as you type once MIN_CHARS are entered (debounced, like a server request); Enter searches right away
+      var v = e.target.value.trim();
+      clearTimeout(searchTimer);
+      if (v.length < MIN_CHARS) p.pqRun = null;
+      else searchTimer = setTimeout(function () { set({ pqRun: v, letter: null }); }, 300);
+    }
+    set(p);
   });
 
   /* Drag users, roles or units from the right panel into the group */

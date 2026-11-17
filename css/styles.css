@@ -518,3 +518,13 @@ a { color: var(--brand-dark); }
 .groups-layout > .card > :not(.scroll-y) { flex-shrink: 0; }
 .groups-layout > .card > .ga-list { flex-shrink: 1; }
 .az[aria-current="true"] { background: var(--brand-50); color: var(--brand-dark); font-weight: 600; }
+
+/* Large organizations: explicit search */
+.ga-search { flex: 0 0 auto; display: flex; gap: 8px; margin: 0; }
+.ga-search .input-icon { flex: 1 1 auto; min-width: 0; }
+.ga-search input[type="search"]::-webkit-search-cancel-button { cursor: pointer; }
+.ga-empty { padding: 40px 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.ga-empty .featured { width: 48px; height: 48px; margin-bottom: 12px; border-radius: 9999px; background: var(--brand-50); color: var(--brand); display: flex; align-items: center; justify-content: center; }
+.ga-empty strong { font-size: 16px; line-height: 24px; color: var(--fg-primary); }
+.ga-empty span { color: var(--fg-secondary); max-width: 280px; }
+.ga-count { padding: 0 2px 4px; font-size: 12px; line-height: 18px; color: var(--fg-tertiary); }

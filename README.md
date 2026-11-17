@@ -3,7 +3,9 @@
 Clickable, responsive prototype of two redesigned Business Studio pages, linked through the side menu:
 
 - **Agent jobs** (Administration › Jobs › Agents) – `index.html`
-- **Groups** (Security › Groups) – `groups.html`
+- **Groups** (Security › Groups), in two versions:
+  - small organization – `groups.html`: the "Add to group" panel lists everyone and filters while you type
+  - large organization – `groups-large.html`: the panel stays empty until you search; results appear as you type once 2 characters are entered (Enter searches right away)
 
 Plain HTML, CSS and JavaScript: no build step and no dependencies apart from Google Fonts.
 
@@ -13,9 +15,9 @@ Plain HTML, CSS and JavaScript: no build step and no dependencies apart from Goo
 | --- | --- |
 | ![Details](docs/desktop-details.png) | ![Filters](docs/desktop-filters.png) |
 
-| Groups |
-| --- |
-| ![Groups](docs/groups.png) |
+| Groups – small organization | Groups – large organization |
+| --- | --- |
+| ![Groups](docs/groups.png) | ![Groups, large organization](docs/groups-large.png) |
 
 | Tablet | Phone |
 | --- | --- |
@@ -43,7 +45,7 @@ Alternative without Actions: set **Source** to **Deploy from a branch**, choose 
 ### Updating an existing repository
 
 Replace all files in the repository with the contents of this folder and push (or upload) again; the workflow redeploys automatically.
-`index.html` loads the CSS and JS with a version suffix (`?v=20261117`). Change it when you edit those files so browsers don't keep an old cached copy.
+`index.html` loads the CSS and JS with a version suffix (`?v=20261118e`). Change it when you edit those files so browsers don't keep an old cached copy.
 
 ## Run it locally
 
@@ -86,7 +88,8 @@ Fields without sample data (Group, Sequence number, Trigger, Agent Runtime Servi
 
 ```
 index.html                    Agent jobs page
-groups.html                   Groups page
+groups.html                   Groups page, small organization
+groups-large.html             Groups page, large organization (window.ORG_SIZE = 'large')
 css/styles.css                design tokens, components, breakpoints
 js/icons.js                   Untitled UI icon paths (from the Doxis Figma library)
 js/data.js                    sample jobs, job IDs, table columns and side menu – replace with API data
