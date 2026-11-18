@@ -382,7 +382,7 @@ a { color: var(--brand-dark); }
 .groups-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr) 356px; gap: 16px; height: max(560px, calc(100vh - var(--topbar-h) - 140px)); }
 .groups-layout > .card { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 .g-head { display: flex; align-items: center; gap: 8px; padding: 16px 16px 12px; }
-.g-head h2 { margin: 0; font-size: 18px; line-height: 28px; font-weight: 600; }
+.g-head h2 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 600; }
 .g-head .count { margin-left: 2px; }
 .g-head p { margin: 0; color: var(--fg-secondary); }
 .g-pad { padding: 0 16px 12px; }
@@ -411,7 +411,7 @@ a { color: var(--brand-dark); }
 .g-detail { position: relative; }
 .gd-head { display: flex; align-items: flex-start; gap: 16px; padding: 16px 16px 16px 20px; border-bottom: 1px solid var(--border-subtle); }
 .gd-head .titles { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-.gd-head h2 { margin: 0; font-size: 20px; line-height: 30px; font-weight: 600; word-break: break-word; }
+.gd-head h2 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 600; word-break: break-word; }
 .gd-head .ref { margin: 0; display: flex; align-items: center; gap: 6px; color: var(--fg-secondary); }
 .gd-head .ref .icon { color: var(--fg-quaternary); }
 .gd-head .ref strong { color: var(--fg-primary); font-weight: 600; }
@@ -445,7 +445,7 @@ a { color: var(--brand-dark); }
 /* Add to group panel (Figma: sidepanel.fig, "Add to rights") */
 .g-add { padding: 16px; gap: 16px; box-shadow: 0 4px 4px 0 rgba(6,96,116,0.04); }
 .ga-head { display: flex; flex-direction: column; gap: 2px; }
-.ga-head h2 { margin: 0; font-size: 18px; line-height: 28px; font-weight: 600; color: var(--fg-primary); }
+.ga-head h2 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 600; color: var(--fg-primary); }
 .ga-head p { margin: 0; color: var(--fg-secondary); }
 .tabs.tabs-sm { height: 36px; flex: 0 0 auto; display: flex; overflow: visible; }
 .tabs-sm .tab { height: 36px; flex: 1 1 0; justify-content: center; padding: 8px 12px; font-size: 14px; line-height: 20px; }
