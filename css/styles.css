@@ -538,3 +538,10 @@ a { color: var(--brand-dark); }
 .clear-x:hover { background: var(--border-subtle); color: var(--fg-tertiary); }
 input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
 .input-icon input:focus-visible, .field-search input:focus-visible, .topbar-search input:focus-visible { box-shadow: none; }
+
+/* Empty states: type sizes and spacing from the Figma empty state (icon 20 → title 8 → text 32 → actions) */
+.g-empty, .ga-empty { gap: 0; }
+.g-empty .featured, .ga-empty .featured { margin-bottom: 20px; }
+.g-empty strong, .ga-empty strong { font-size: 16px; line-height: 24px; font-weight: 600; }
+.g-empty span, .ga-empty span { margin-top: 4px; font-size: 14px; line-height: 20px; max-width: 352px; }
+.g-empty .btn { margin-top: 32px; }
