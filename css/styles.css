@@ -418,7 +418,7 @@ a { color: var(--brand-dark); }
 .gd-head .acts { display: flex; gap: 8px; }
 .gd-head .btn-icon { color: var(--fg-tertiary); }
 .gd-head .btn-icon.danger:hover { color: #D92D20; border-color: #FDA29B; background: #FEF3F2; }
-.gd-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 16px; }
+.gd-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 16px; background: var(--bg-canvas); }
 .gd-bar .field-search { width: 320px; flex: 0 1 320px; }
 .gd-bar .total { margin-left: auto; color: var(--fg-secondary); }
 .gd-bar .total strong { color: var(--fg-primary); }
