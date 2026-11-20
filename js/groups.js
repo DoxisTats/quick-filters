@@ -4,7 +4,9 @@
 
   var D = window.GROUP_DATA;
   var TYPE_LABEL = { user: 'User', role: 'Role', unit: 'Unit' };
-  var TYPE_ICON = { user: 'user-01', role: 'shield-01', unit: 'building-07' };
+  var TYPE_ICON = { user: 'user-01', role: 'briefcase-01', unit: 'cube-outline' };
+  // Users with a profile picture show it; everyone else gets a grey placeholder with their type icon (sample: one photo)
+  var PHOTOS = { 'anna.becker@example.com': 'assets/avatar.jpg' };
   var POOL = { users: 'user', roles: 'role', units: 'unit' };
   var TAB_LABEL = { users: 'Users', roles: 'Roles', units: 'Units' };
 
@@ -114,7 +116,7 @@
       .filter(function (m) { var w = who(m.name, m.type); return matchesAll(q, [m.name, w.primary, w.secondary, TYPE_LABEL[m.type]]); });
     var rows = members.map(function (m) {
       return '<div class="g-tr g-row">' +
-        '<div class="g-name"><span class="type-ic ' + m.type + '">' + icon(TYPE_ICON[m.type], 16) + '</span>' + (function () { var w = who(m.name, m.type); return '<span class="nm2"><span title="' + esc(w.hint) + '">' + esc(w.primary) + '</span>' + (w.secondary ? '<small title="' + esc(w.secondary) + '">' + esc(w.secondary) + '</small>' : '') + '</span>'; })() + '</div>' +
+        '<div class="g-name">' + (PHOTOS[m.name] ? '<span class="type-ic photo"><img src="' + PHOTOS[m.name] + '" alt=""></span>' : '<span class="type-ic ' + m.type + '">' + icon(TYPE_ICON[m.type], 20) + '</span>') + (function () { var w = who(m.name, m.type); return '<span class="nm2"><span title="' + esc(w.hint) + '">' + esc(w.primary) + '</span>' + (w.secondary ? '<small title="' + esc(w.secondary) + '">' + esc(w.secondary) + '</small>' : '') + '</span>'; })() + '</div>' +
         '<div>' + TYPE_LABEL[m.type] + '</div>' +
         '<div class="act"><button type="button" class="g-remove" data-action="remove-member" data-v="' + esc(m.name) + '" data-t="' + m.type + '" aria-label="Remove ' + esc(m.name) + ' from ' + esc(g.name) + '" title="Remove from group">' + icon('x-close', 20) + '</button></div>' +
       '</div>';
