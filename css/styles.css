@@ -379,7 +379,7 @@ a { color: var(--brand-dark); }
 .page-title h1 { margin: 4px 0 0; font-size: 24px; line-height: 32px; font-weight: 600; }
 .page-title p { margin: 0; color: var(--fg-secondary); font-size: 16px; line-height: 24px; }
 
-.groups-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr) 356px; gap: 16px; height: max(560px, calc(100vh - var(--topbar-h) - 140px)); }
+.groups-layout { display: grid; grid-template-columns: 320px minmax(0, 1fr) 320px; gap: 16px; height: max(560px, calc(100vh - var(--topbar-h) - 140px)); }
 .groups-layout > .card { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 .g-head { display: flex; align-items: center; gap: 8px; padding: 16px 16px 12px; }
 .g-head h2 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 600; }
@@ -499,7 +499,7 @@ a { color: var(--brand-dark); }
 .btn-danger { background: #D92D20; color: #FFFFFF; border: 2px solid rgba(255,255,255,0.12); box-shadow: var(--shadow-btn); }
 .btn-danger:hover { background: #B42318; }
 
-@media (max-width: 1280px) { .groups-layout { grid-template-columns: 240px minmax(0, 1fr) 320px; } }
+@media (max-width: 1280px) { .groups-layout { grid-template-columns: 280px minmax(0, 1fr) 280px; } }
 @media (max-width: 900px) {
   .groups-layout { grid-template-columns: minmax(0, 1fr); height: auto; }
   .g-list .g-items { max-height: 240px; }

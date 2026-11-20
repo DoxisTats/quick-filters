@@ -45,7 +45,7 @@ Alternative without Actions: set **Source** to **Deploy from a branch**, choose 
 ### Updating an existing repository
 
 Replace all files in the repository with the contents of this folder and push (or upload) again; the workflow redeploys automatically.
-`index.html` loads the CSS and JS with a version suffix (`?v=20261120b`). Change it when you edit those files so browsers don't keep an old cached copy.
+`index.html` loads the CSS and JS with a version suffix (`?v=20261120c`). Change it when you edit those files so browsers don't keep an old cached copy.
 
 ## Run it locally
 
