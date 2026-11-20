@@ -138,7 +138,7 @@
         '<button type="button" class="btn btn-icon danger" data-action="delete-open" aria-label="Delete group" title="Delete group">' + icon('trash-01') + '</button>' +
       '</div></div>' +
       '<div class="gd-bar"><label class="field-search">' + icon('search-lg') + '<input type="text" data-input="mq" value="' + esc(state.mq) + '" placeholder="Search for user, role or unit" aria-label="Search members">' + clearBtn('mq') + '</label>' +
-        '<span class="total"><strong>' + g.members.length + '</strong> ' + (g.members.length === 1 ? 'member' : 'members') + '</span></div>' +
+        '<span class="total"><strong>' + g.members.length + '</strong> assigned</span></div>' +
       '<div class="scroll-y g-table" data-scroll="members">' + body + '</div>' +
       '<div class="drop-hint" aria-hidden="true">' + icon('user-plus-01') + 'Drop to add to ' + esc(g.name) + '</div>' +
     '</section>';
