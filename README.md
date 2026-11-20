@@ -45,7 +45,7 @@ Alternative without Actions: set **Source** to **Deploy from a branch**, choose 
 ### Updating an existing repository
 
 Replace all files in the repository with the contents of this folder and push (or upload) again; the workflow redeploys automatically.
-`index.html` loads the CSS and JS with a version suffix (`?v=20261120c`). Change it when you edit those files so browsers don't keep an old cached copy.
+`index.html` loads the CSS and JS with a version suffix (`?v=20261120e`). Change it when you edit those files so browsers don't keep an old cached copy.
 
 ## Run it locally
 
@@ -70,6 +70,7 @@ Open `index.html` in a browser (double-click works), or serve the folder with `n
 - **Group list** with search and member counts; select a group to see its members
 - **Group details**: name, the application that references it, Edit (rename) and Delete with a confirmation dialog, member search, and a table of users, roles and units with Remove
 - **Add to group** side panel (Figma: sidepanel.fig) with Users, Roles and Units tabs, search, an A–Z index on the right; each entry shows the name with "username · email" below; add with the ⊕ button or by **dragging** an entry into the members table
+- When the "Add to group" panel gets narrow (under about 294px), its Users / Roles / Units tabs turn into a dropdown showing the current list; with room again, the tabs come back
 - **Create group** dialog with name validation (empty or duplicate names)
 - Notifications in the top right corner with Undo for add, remove, rename and delete; they close on their own after 8 seconds
 

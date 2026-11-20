@@ -218,6 +218,10 @@
     return '<section class="card g-add" aria-label="Add to group">' +
       '<div class="ga-head"><h2>Add to group</h2><p>Drag an entry into the table or select Add.</p></div>' +
       '<div class="tabs tabs-sm" role="tablist" aria-label="Member type">' + tabs + '</div>' +
+      // Narrow panel: the tabs become a dropdown showing the current list (switched by a container query in the CSS)
+      '<label class="ga-type select-wrap"><span class="sr-only">Show</span><select class="select" data-input="tabsel" aria-label="Member type">' +
+        ['users', 'roles', 'units'].map(function (t) { return '<option value="' + t + '"' + (state.tab === t ? ' selected' : '') + '>' + TAB_LABEL[t] + '</option>'; }).join('') +
+      '</select>' + icon('chevron-down', 20) + '</label>' +
       search +
       '<div class="ga-list">' +
         '<div class="scroll-y pool" data-scroll="pool">' + body + '</div>' +
@@ -411,6 +415,11 @@
   root.addEventListener('input', function (e) {
     var key = e.target.getAttribute('data-input');
     if (!key) return;
+    if (key === 'tabsel') {
+      set({ tab: e.target.value, pq: '', pqRun: null, letter: null });
+      var pl = root.querySelector('[data-scroll="pool"]'); if (pl) pl.scrollTop = 0;
+      return;
+    }
     if (key === 'modalValue') { state.modal.value = e.target.value; if (state.modal.error) { state.modal.error = null; render(); } return; }
     var p = {}; p[key] = e.target.value;
     // Large organizations: no search while typing (each search is a backend request); clearing the field resets the list

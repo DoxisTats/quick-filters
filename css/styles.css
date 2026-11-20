@@ -545,3 +545,12 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; d
 .g-empty strong, .ga-empty strong { font-size: 16px; line-height: 24px; font-weight: 600; }
 .g-empty span, .ga-empty span { margin-top: 4px; font-size: 14px; line-height: 20px; max-width: 352px; }
 .g-empty .btn { margin-top: 32px; }
+
+/* "Add to group": when the panel content is narrower than 260px (panel under ~294px) the tabs turn into a dropdown; wider again, the tabs return */
+.g-add { container-type: inline-size; }
+.ga-type { display: none; flex: 0 0 auto; }
+.ga-type .select { color: var(--fg-primary); font-weight: 500; box-shadow: var(--shadow-xs); }
+@container (max-width: 259px) {
+  .g-add .tabs-sm { display: none; }
+  .g-add .ga-type { display: block; }
+}
